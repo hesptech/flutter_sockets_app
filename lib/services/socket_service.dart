@@ -12,8 +12,14 @@ enum ServerStatus {
 class SocketService with ChangeNotifier{
 
   ServerStatus _serverStatus = ServerStatus.connecting;
+  late IO.Socket _socket;
 
-  get serverStatus => _serverStatus;
+  ServerStatus get serverStatus => _serverStatus;
+  
+  // listens-emits and calls socket off
+  IO.Socket get socket => _socket;
+  // emits but does not call socket off
+  Function get emit => _socket.emit;
 
   SocketService() {
     _initConfig();
@@ -23,31 +29,29 @@ class SocketService with ChangeNotifier{
   void _initConfig() {
     
     // Dart client
-    IO.Socket socket = IO.io('http://192.168.0.223:3000/', {
+    _socket = IO.io('http://192.168.0.223:3000/', {
       'transports': ['websocket'],
       'autoConnect': true
     });
 
-    socket.on('connect', (_) {
-      print('connect');
+    _socket.on('connect', (_) {
+      //print('connect');
       _serverStatus = ServerStatus.online;
       notifyListeners();
     });
 
-    socket.on('disconnect', (_) {
-      print('disconnect');
+    _socket.on('disconnect', (_) {
+      //print('disconnect');
       _serverStatus = ServerStatus.offline;
       notifyListeners();
     });
 
-    socket.on('nuevo-mensaje', ( payload ) {
+/*     socket.on('nuevo-mensaje', ( payload ) {
       print('new message: $payload');
       print('new message:' + payload['nombre']);
       print('new message:' + payload['mensaje']);
       print( payload.containsKey('mensaje2') ? payload['mensaje2'] : ' no hay' );
-
-
-    });
+    }); */
 
   }
 
